@@ -23,7 +23,10 @@ class _PlotterPage extends State<PlotterPage> {
 
   List<LatLng> initLineScribbles = [];
   List<Polyline> displayLineScribbles = [];
-  
+
+  List<LatLng> initPolygon = [];
+  List<Polygon> displayPolygons = [];
+
   String activeButton = "";
   String tileServer = "openstreetmaps"; // or maptiler
   bool isScribbling = false;
@@ -68,6 +71,18 @@ class _PlotterPage extends State<PlotterPage> {
             initLineScribbles = [];
           });
         }
+      case "polygon":
+        setState(() {
+          initPolygon.add(p);
+          displayPolygons.add(
+            Polygon(
+              points: initPolygon,
+              borderColor: Colors.white,
+              borderStrokeWidth: 12
+            )
+          );
+        });
+
       default:
         () {};
     }
@@ -114,7 +129,7 @@ class _PlotterPage extends State<PlotterPage> {
 
         children: [
           TileLayer( // Layer for displaying map tiles
-            urlTemplate: (tileServer == "openstreetmaps") ? 'https://tile.openstreetmap.org/{z}/{x}/{y}.png' : 'https://api.maptiler.com/tiles/satellite-v2/{z}/{x}/{y}.jpg?key=1t5SvydPFIjH2v7LB8Jd', // OSMF's Tile Server
+            urlTemplate: (tileServer == "openstreetmaps") ? 'https://tile.openstreetmap.org/{z}/{x}/{y}.png' : 'https://api.maptiler.com/maps/satellite/256/{z}/{x}/{y}.jpg?key=1t5SvydPFIjH2v7LB8Jd', // OSMF's Tile Server
             userAgentPackageName: 'com.example.app',
             maxNativeZoom: 19,
           ),
@@ -129,6 +144,11 @@ class _PlotterPage extends State<PlotterPage> {
           PolylineLayer(
             polylines: displayLineScribbles,
             polylineCulling: true,
+          ),
+
+          PolygonLayer(
+            polygons: displayPolygons,
+            polygonCulling: true
           ),
 
           RichAttributionWidget(
@@ -211,6 +231,22 @@ class _PlotterPage extends State<PlotterPage> {
                       }
                     });
                   }, icon: Icon(size: 45, Icons.draw)
+                ),
+                IconButton.filled(
+                  style: ButtonStyle( 
+                    backgroundColor:  (activeButton == "polygon") ? WidgetStateProperty.all(Colors.greenAccent[100]) : WidgetStateProperty.all(Colors.white)
+                  ),
+                  color: (activeButton == "polygon") ? Colors.green[800] : Colors.green,
+                  onPressed: () {
+                    setState(() {
+                      if (activeButton != "polygon") {
+                        activeButton = "polygon";
+                      } else {
+                        initPolygon = [];
+                        activeButton = "";
+                      }
+                    });
+                  }, icon: Icon(size: 45, Icons.square_outlined)
                 ),
                 IconButton.filled(
                   style: ButtonStyle( 
